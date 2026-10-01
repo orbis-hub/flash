@@ -1,9 +1,16 @@
 {
   "name": "orbis e-ink (waveshare-29)",
-  "version": "not built yet",
-  "home_assistant_domain": "",
+  "version": "0.1.0",
   "new_install_prompt_erase": true,
   "builds": [
-    { "chipFamily": "ESP32", "parts": [{ "path": "../firmware/orbis-waveshare-29.bin", "offset": 0 }] }
+    {
+      "chipFamily": "ESP32",
+      "parts": [
+        {
+          "path": "../firmware/orbis-waveshare-29.bin",
+          "offset": 0
+        }
+      ]
+    }
   ]
 }
