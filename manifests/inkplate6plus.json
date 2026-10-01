@@ -1,0 +1,9 @@
+{
+  "name": "orbis e-ink (inkplate6plus)",
+  "version": "not built yet",
+  "home_assistant_domain": "",
+  "new_install_prompt_erase": true,
+  "builds": [
+    { "chipFamily": "ESP32", "parts": [{ "path": "../firmware/orbis-inkplate6plus.bin", "offset": 0 }] }
+  ]
+}

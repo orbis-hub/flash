@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>orbis · flash an e-ink display</title>
+<link rel="icon" href="https://raw.githubusercontent.com/orbis-hub/orbis/main/brand/logo-tile.svg" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=DotGothic16&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet" />
+<script type="module" src="https://unpkg.com/esp-web-tools@10/dist/web/install-button.js?module"></script>
+<style>
+  :root { --bg:#17121c; --paper:#1f1826; --paper-2:#291f32; --ink:#f1e7f0; --ink-soft:#b39fb0; --line:#5c4a62; --accent:#ff8fb4; --accent-2:#b0a4ff; --accent-soft:#3a2a3f; }
+  @media (prefers-color-scheme: light) { :root { --bg:#f4ecf2; --paper:#fffaf9; --paper-2:#f9eef4; --ink:#3b2c3a; --ink-soft:#7a6478; --line:#c9a9bf; --accent:#e2789b; --accent-2:#8b7fd6; --accent-soft:#fbe3ec; } }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:14px/1.6 "IBM Plex Mono", ui-monospace, monospace; }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 32px 16px 64px; }
+  h1, h2, .pixel { font-family: "DotGothic16", monospace; font-weight: 400; }
+  h1 { font-size: 28px; margin: 0; display:flex; align-items:center; gap:12px; }
+  h2 { font-size: 16px; margin: 0; }
+  .win { background: var(--paper); border: 1.5px solid var(--line); box-shadow: 4px 4px 0 var(--line); margin-top: 18px; }
+  .win-title { display:flex; align-items:center; gap:8px; padding:5px 10px; border-bottom:1.5px solid var(--line); background: var(--paper-2); font-family:"DotGothic16"; font-size:13px; }
+  .dots i { display:inline-block; width:8px; height:8px; border-radius:50%; border:1px solid var(--line); background: var(--paper); margin-right:4px; }
+  .dots i:first-child { background: var(--accent); }
+  .win-body { padding: 14px; }
+  label { display:block; font-family:"DotGothic16"; font-size:12px; color: var(--ink-soft); margin-bottom:4px; }
+  select, .btn { font: inherit; color: var(--ink); background: var(--paper-2); border: 1.5px solid var(--line); padding: 6px 10px; }
+  select { width: 100%; }
+  .btn { font-family:"DotGothic16"; box-shadow: 2px 2px 0 var(--line); cursor:pointer; display:inline-flex; align-items:center; gap:6px; }
+  .btn.primary { background: var(--accent); color:#fff; border-color: var(--accent); box-shadow: 2px 2px 0 var(--ink); }
+  .btn:hover { transform: translate(1px,1px); box-shadow: 1px 1px 0 var(--line); }
+  .soft { color: var(--ink-soft); }
+  .chip { display:inline-block; padding:1px 8px; border:1px solid var(--line); background:var(--paper-2); font-size:12px; margin: 2px 4px 2px 0; }
+  ol { padding-left: 18px; } li { margin: 4px 0; }
+  code { background: var(--paper-2); padding: 0 4px; }
+  a { color: var(--accent-2); text-decoration: underline dotted; text-underline-offset: 3px; } a:hover { color: var(--accent); }
+  .unsupported { color: var(--accent); }
+  esp-web-install-button { --esp-tools-button-color: var(--accent); --esp-tools-button-text-color: #fff; --esp-tools-button-border-radius: 0; }
+  .row { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+  footer { margin-top: 32px; font-size: 11px; color: var(--ink-soft); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1><img src="https://raw.githubusercontent.com/orbis-hub/orbis/main/brand/logo-dark.svg" alt="" width="36" height="36" /> orbis · flash an e-ink display</h1>
+  <p class="soft">puts the orbis firmware on your board straight from the browser. no ide, no drivers. needs chrome or edge (web serial) and a usb data cable.</p>
+
+  <div class="win">
+    <div class="win-title"><span class="dots"><i></i><i></i><i></i></span> 1 · pick your board</div>
+    <div class="win-body">
+      <label for="board">board</label>
+      <select id="board">
+        <optgroup label="soldered inkplate">
+          <option value="inkplate6">inkplate 6 (800×600, 8 grays)</option>
+          <option value="inkplate6plus">inkplate 6PLUS (1024×758, touch)</option>
+          <option value="inkplate10">inkplate 10 (1200×825)</option>
+          <option value="inkplate6color">inkplate 6COLOR (600×448, b/w mode)</option>
+        </optgroup>
+        <optgroup label="lilygo">
+          <option value="lilygo-t5-47">t5 4.7" (esp32, 960×540, 16 grays)</option>
+          <option value="lilygo-t5-47-s3">t5 4.7" s3 / plus (touch)</option>
+        </optgroup>
+        <optgroup label="waveshare esp32 e-paper driver board">
+          <option value="waveshare-75" selected>7.5" b/w (800×480)</option>
+          <option value="waveshare-42">4.2" b/w (400×300)</option>
+          <option value="waveshare-29">2.9" b/w (296×128)</option>
+        </optgroup>
+      </select>
+      <p id="boardinfo" class="soft" style="margin:8px 0 0"></p>
+    </div>
+  </div>
+
+  <div class="win">
+    <div class="win-title"><span class="dots"><i></i><i></i><i></i></span> 2 · connect & flash</div>
+    <div class="win-body">
+      <div class="row">
+        <esp-web-install-button id="install" manifest="manifests/waveshare-75.json">
+          <button slot="activate" class="btn primary">◎ install orbis firmware</button>
+          <span slot="unsupported" class="unsupported">your browser has no web serial. use chrome or edge on a desktop.</span>
+          <span slot="not-allowed" class="unsupported">web serial needs https or localhost.</span>
+        </esp-web-install-button>
+        <span id="version" class="chip">version: …</span>
+      </div>
+      <p class="soft" style="margin:10px 0 0">plug the board in via usb first. if it does not show up in the port list, hold <b>BOOT</b> while pressing <b>RST</b> once (or hold BOOT while plugging in) to enter download mode. inkplate and lilygo boards usually need no button dance.</p>
+    </div>
+  </div>
+
+  <div class="win">
+    <div class="win-title"><span class="dots"><i></i><i></i><i></i></span> 3 · pair it with your hub</div>
+    <div class="win-body">
+      <ol>
+        <li>in orbis go to <b>e-ink</b> in the sidebar → <b>+ display</b>, pick the same board, assign a dashboard. open <i>token &amp; setup</i>.</li>
+        <li>after flashing the board starts a wifi called <b>orbis-eink</b>. connect to it with your phone or laptop; a page opens (or visit <code>192.168.4.1</code>).</li>
+        <li>choose your wifi, paste <b>hub url</b>, <b>display id</b> and <b>token</b> from step 1. save.</li>
+        <li>the display shows your dashboard within a minute and refreshes every few minutes (interval is set on the hub). hold <b>BOOT</b> while powering on to reopen the setup wifi.</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="win">
+    <div class="win-title"><span class="dots"><i></i><i></i><i></i></span> other boards</div>
+    <div class="win-body soft">
+      any esp32 + e-paper combo gxepd2 knows works: copy an env in <a href="https://github.com/orbis-hub/orbis/blob/main/firmware/platformio.ini">platformio.ini</a>, set the panel class and size, build with platformio. touch overlays with gt911 or ft6x36 controllers are detected automatically when you set the i2c pins. pull requests with new board envs are welcome.
+    </div>
+  </div>
+
+  <footer>firmware source: <a href="https://github.com/orbis-hub/orbis/tree/main/firmware">orbis-hub/orbis/firmware</a> · binaries from the <a href="https://github.com/orbis-hub/orbis/releases?q=fw-v">fw-v releases</a> · flashing powered by <a href="https://esphome.github.io/esp-web-tools/">esp web tools</a></footer>
+</div>
+<script>
+  const info = {
+    "inkplate6": "esp32 · 800×600 · 8 gray levels · battery sense",
+    "inkplate6plus": "esp32 · 1024×758 · 8 gray levels · touch via the inkplate library",
+    "inkplate10": "esp32 · 1200×825 · 8 gray levels",
+    "inkplate6color": "esp32 · 600×448 · black/white mode (color later)",
+    "lilygo-t5-47": "esp32 wrover · 960×540 · 16 gray levels",
+    "lilygo-t5-47-s3": "esp32-s3 · 960×540 · 16 gray levels · gt911/ft6x36 touch autodetected",
+    "waveshare-75": "esp32 driver board · 800×480 · black/white · the usual one",
+    "waveshare-42": "esp32 driver board · 400×300 · black/white",
+    "waveshare-29": "esp32 driver board · 296×128 · black/white",
+  };
+  const sel = document.getElementById("board"), btn = document.getElementById("install"), bi = document.getElementById("boardinfo"), ver = document.getElementById("version");
+  function update() {
+    btn.manifest = `manifests/${sel.value}.json`;
+    bi.textContent = info[sel.value] ?? "";
+    fetch(btn.manifest).then(r => r.json()).then(m => ver.textContent = `version: ${m.version}`).catch(() => ver.textContent = "version: not built yet");
+  }
+  sel.addEventListener("change", update);
+  update();
+</script>
+</body>
+</html>

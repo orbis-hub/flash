@@ -1,0 +1,9 @@
+{
+  "name": "orbis e-ink (waveshare-42)",
+  "version": "not built yet",
+  "home_assistant_domain": "",
+  "new_install_prompt_erase": true,
+  "builds": [
+    { "chipFamily": "ESP32", "parts": [{ "path": "../firmware/orbis-waveshare-42.bin", "offset": 0 }] }
+  ]
+}
